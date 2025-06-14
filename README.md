@@ -61,11 +61,44 @@ To upload a sample photo to your S3 bucket, use the script below. Ensure the pho
 
 ```bash
 ./upload_photo.sh
+
 ```
 
 This script will upload a photo (e.g., a sample cat photo) to the S3 bucket as specified in the Terraform configuration.
 
 ---
+
+## Manual Steps to upload a phote
+1. Encode the photo file
+```bash
+base64 -i ./photo/cat.jpeg > data.b64
+
+```
+2. Get the API Key - required to authenticate with the API Gateway
+```bash
+API_KEY="$(aws apigateway get-api-keys \
+     --include-value --region eu-west-1  \
+     --query "items[?name=='upload-api-key'].value" \
+     --output text)"
+```
+
+3. Create the Payload json file
+```bash
+cat > payload.json <<EOF
+{"filename":"cat.jpeg","data":"$(< data.b64)"}
+EOF
+```
+
+4. Run Curl command to POST the photo to s3
+```bash
+curl -X POST \
+     -H "Content-Type: application/json" \
+     -H "x-api-key: ${API_KEY}" \
+     --data-binary @payload.json \
+     "$(terraform output -raw api_endpoint)"
+```
+
+
 
 ## GitHub Actions Workflow
 
