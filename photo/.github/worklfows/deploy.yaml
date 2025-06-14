@@ -1,0 +1,69 @@
+name: Deploy Terraform Infrastructure and Lambda
+
+on:
+  push:
+    branches:
+      - main
+      - interview-task
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: eu-west-1 # Change to your region if different
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.0.0
+
+    - name: Initialize Terraform
+      run: terraform init
+
+    - name: Format Terraform code
+      run: terraform fmt -check -recursive
+
+    - name: Validate Terraform code
+      run: terraform validate
+
+    - name: Plan Terraform deployment
+      run: terraform plan -out=tfplan
+
+    - name: Apply Terraform deployment
+      run: terraform apply -auto-approve tfplan
+
+    # - name: Upload Lambda function code
+    #   run: |
+    #     # Package the Lambda function code into a zip file
+    #     zip -r lambda.zip ./lambda
+    #     # Upload the function code to AWS Lambda
+    #     aws lambda update-function-code --function-name image-uploader --zip-file fileb://lambda.zip
+
+    - name: Output API Gateway endpoint and API key
+      run: |
+        echo "API Gateway endpoint: $(terraform output -raw api_endpoint)"
+
+    # Generate a unique name for the tfstate file
+    - name: Generate unique tfstate filename
+      id: generate_tfstate_name
+      run: |
+        echo "TFSTATE_FILE=tfstate-${GITHUB_RUN_ID}.json" >> $GITHUB_ENV
+
+    # Save tfstate file as an artifact
+    - name: Upload tfstate as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: tfstate-${{ github.run_id }}
+        path: terraform.tfstate
