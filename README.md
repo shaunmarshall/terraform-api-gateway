@@ -35,7 +35,17 @@ Alternatively, you can manually add your `access_key` and `secret_key` to the `p
 
 ---
 
-### Step 3: Initialize Terraform
+### Step 3: Update Varaibles files
+
+- **Add Your Public IP address in CIDR format (1.2.3.4/32) to the `allowed_ips` variable**
+- Update `aws_region` variable to own prefered region
+- Change `bucket_name` if required
+- Change `private_subnet_cidrs` if required
+
+---
+
+
+### Step 4: Initialize Terraform
 
 Run the following command to initialize the Terraform environment:
 
@@ -43,7 +53,7 @@ Run the following command to initialize the Terraform environment:
 terraform init
 ```
 
-### Step 4: Apply the Terraform Configuration
+### Step 5: Apply the Terraform Configuration
 
 To deploy the infrastructure, apply the Terraform code with the following command:
 

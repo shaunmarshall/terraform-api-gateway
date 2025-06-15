@@ -10,6 +10,12 @@ variable "bucket_name" {
   default     = "photos-store"
 }
 
+variable "allowed_ips" {
+  description = "List of allowed source IPs for API access (CIDR format)"
+  type        = list(string)
+  default     = ["82.43.64.101/32"]
+}
+
 variable "availability_zones" {
   description = "List of AZs for subnets"
   type        = list(string)

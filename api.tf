@@ -2,6 +2,9 @@
 
 resource "aws_api_gateway_rest_api" "api" {
   name        = "image-api"
+  endpoint_configuration {
+    types = ["REGIONAL"]
+  }
   description = "API Gateway to upload images"
 }
 
@@ -46,13 +49,15 @@ resource "aws_api_gateway_deployment" "deployment" {
   triggers = { redeployment = sha1(jsonencode(aws_api_gateway_rest_api.api)) }
 }
 
-resource "aws_api_gateway_stage" "prod" {
+resource "aws_api_gateway_stage" "dev" {
+  depends_on    = [
+      aws_wafv2_web_acl.api_acl
+  ]
   rest_api_id   = aws_api_gateway_rest_api.api.id
   deployment_id = aws_api_gateway_deployment.deployment.id
-  stage_name    = "prod"
+  stage_name    = "dev"
 }
 
-# 8) API Key and Usage Plan
 resource "aws_api_gateway_api_key" "upload_api_key" {
   name        = "upload-api-key"
   description = "API key for image upload"
@@ -65,7 +70,7 @@ resource "aws_api_gateway_usage_plan" "upload_plan" {
 
   api_stages {
     api_id = aws_api_gateway_rest_api.api.id
-    stage  = aws_api_gateway_stage.prod.stage_name
+    stage  = aws_api_gateway_stage.dev.stage_name
   }
 
   throttle_settings {
