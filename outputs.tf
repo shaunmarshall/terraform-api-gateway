@@ -1,7 +1,7 @@
 output "api_endpoint" {
-  depends_on  = [ aws_api_gateway_stage.prod ]
+  depends_on  = [ aws_api_gateway_stage.dev ]
   description = "URL to POST images to"
-  value       = "${aws_api_gateway_stage.prod.invoke_url}/upload"
+  value       = "${aws_api_gateway_stage.dev.invoke_url}/upload"
 }
 
 output "s3_bucket" {

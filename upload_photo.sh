@@ -12,7 +12,7 @@ cat > payload.json <<EOF
 {"filename":"cat.jpeg","data":"$(< data.b64)"}
 EOF
 
-curl -v -X POST \
+curl -vvv -X POST \
      -H "Content-Type: application/json" \
      -H "x-api-key: ${API_KEY}" \
      --data-binary @payload.json \
